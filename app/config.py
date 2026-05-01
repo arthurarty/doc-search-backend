@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     gcp_service_account_path: str
     gcp_storage_bucket_name: str
     signed_url_expiry_time: int = 15  # 15 minutes
+    cors_origins: str
 
     model_config = SettingsConfigDict(env_file=".env")
 

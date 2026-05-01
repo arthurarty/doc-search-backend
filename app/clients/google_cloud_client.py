@@ -17,6 +17,7 @@ class GoogleCloudClient:
             self,
             bucket_name: str,
             blob_name: str,
+            content_type: str | None = "application/octet-stream",
             expiry_time: int | None = 15
         ):
         """Generates a v4 signed URL for uploading a blob using HTTP PUT.
@@ -30,6 +31,6 @@ class GoogleCloudClient:
             version="v4",
             expiration=datetime.timedelta(minutes=expiry_time),
             method="PUT",
-            content_type="application/octet-stream",
+            content_type=content_type,
         )
         return url

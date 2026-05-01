@@ -2,7 +2,7 @@ from app.clients.google_cloud_client import GoogleCloudClient
 from app.config import settings
 
 
-class CloudStorage:
+class CloudStorageService:
     """
     Orchestrator class for storing and retrieving files from storage.
     """

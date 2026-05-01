@@ -1,16 +1,17 @@
 from fastapi import APIRouter
-from app.services.google_storage_service import generate_upload_signed_url_v4
-
+from app.dependencies import CloudStorageServiceDep
 
 router = APIRouter()
 
 
 @router.get("/signed-url/", tags=["docs"])
-async def get_signed_url():
+async def get_signed_url(
+    cloud_storage_service: CloudStorageServiceDep
+):
     """
     Get a single signed url.
     How to use the signed url
     "curl -X PUT -H 'Content-Type: application/octet-stream' "
     "--upload-file my-file '<signed_url>'"
     """
-    return generate_upload_signed_url_v4()
+    return cloud_storage_service.create_upload_signed_url()

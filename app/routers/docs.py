@@ -7,7 +7,7 @@ router = APIRouter()
 
 
 @router.post("/signed-url/", tags=["docs"], response_model=SignedUrlResponse)
-async def get_signed_url(
+async def create_signed_url(
     file_upload_request: FileUploadRequest,
     cloud_storage_service: CloudStorageServiceDep
 ) -> SignedUrlResponse:

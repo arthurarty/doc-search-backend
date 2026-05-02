@@ -5,7 +5,7 @@ from app.config import settings
 from app.routers import docs
 
 app = FastAPI()
-origins = settings.cors_origins.split(",")
+origins = settings.CORS_ORIGINS.split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

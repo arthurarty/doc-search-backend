@@ -7,11 +7,11 @@ class Settings(BaseSettings):
     This file is responsible for reading the .env file.
     """
 
-    app_name: str = "Doc-Search"
-    gcp_service_account_path: str
-    gcp_storage_bucket_name: str
-    signed_url_expiry_time: int = 15  # 15 minutes
-    cors_origins: str
+    APP_NAME: str = "Doc-Search"
+    GCP_SERVICE_ACCOUNT_PATH: str
+    GCP_STORAGE_BUCKET_NAME: str
+    SIGNED_URL_EXPIRY_TIME: int = 15  # 15 minutes
+    CORS_ORIGINS: str
     SQLALCHEMY_DATABASE_URL: str
     VOYAGE_AI_KEY: str
 

@@ -28,7 +28,7 @@ class CloudStorageService:
             bucket_name=self.bucket_name,
             blob_name=blob_name,
             content_type=file_upload.content_type,
-            expiry_time=settings.signed_url_expiry_time,
+            expiry_time=settings.SIGNED_URL_EXPIRY_TIME,
         )
         return SignedUrlResponse(
             signed_url=signed_url,

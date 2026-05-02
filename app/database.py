@@ -29,7 +29,7 @@ class Base(AsyncAttrs, DeclarativeBase):
     } 
 
 engine = create_async_engine(
-    settings.postgres_database_uri,
+    settings.SQLALCHEMY_DATABASE_URL,
     echo=True,
 )  
 

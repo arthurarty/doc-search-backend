@@ -1,7 +1,7 @@
 from fastapi import APIRouter
-from app.dependencies import CloudStorageServiceDep
-from app.schemas.cloud_storage_schemas import SignedUrlResponse, FileUploadRequest
 
+from app.dependencies import CloudStorageServiceDep
+from app.schemas.cloud_storage_schemas import FileUploadRequest, SignedUrlResponse
 
 router = APIRouter()
 
@@ -9,7 +9,7 @@ router = APIRouter()
 @router.post("/signed-url/", tags=["docs"], response_model=SignedUrlResponse)
 async def create_signed_url(
     file_upload_request: FileUploadRequest,
-    cloud_storage_service: CloudStorageServiceDep
+    cloud_storage_service: CloudStorageServiceDep,
 ) -> SignedUrlResponse:
     """
     Get a single signed url.

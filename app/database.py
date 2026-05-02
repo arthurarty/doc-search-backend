@@ -1,7 +1,7 @@
 import datetime
 from typing import AsyncGenerator
 
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, MetaData
 from sqlalchemy.ext.asyncio import (
     AsyncAttrs,
     AsyncSession,
@@ -9,12 +9,13 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase
+
 from app.config import settings
-from sqlalchemy import MetaData
 
 
 class Base(AsyncAttrs, DeclarativeBase):
     """Base class for all models"""
+
     metadata = MetaData(
         naming_convention={
             "ix": "ix_%(column_0_label)s",
@@ -26,15 +27,17 @@ class Base(AsyncAttrs, DeclarativeBase):
     )
     type_annotation_map = {
         datetime.datetime: DateTime(timezone=True),
-    } 
+    }
+
 
 engine = create_async_engine(
     settings.SQLALCHEMY_DATABASE_URL,
     echo=True,
-)  
+)
 
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
-async def get_async_db_session() -> AsyncGenerator[AsyncSession, None]: 
+
+async def get_async_db_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
         yield session

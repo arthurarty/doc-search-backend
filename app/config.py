@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     Settings and configurations are read from this file.
     This file is responsible for reading the .env file.
     """
+
     app_name: str = "Doc-Search"
     gcp_service_account_path: str
     gcp_storage_bucket_name: str

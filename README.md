@@ -29,7 +29,28 @@ Build the docker container, this will run a Postgres Database that has PGVector 
 docker compose up
 ```
 
+## Migrations
+The app uses Alembic to manage database migrations.  
+To create a new migration run the command.
+```bash
+alembic revision --autogenerate -m "<message>"
+```
+To see the current revision you can use the command.
+```bash
+alembic current
+```
+To upgrade(to run a new migration)
+```bash
+alembic upgrade head
+```
+To roll back the last migration you can use the command.
+```bash
+alembic downgrade -1
+```
+
 ## Running the application:
+You need to have the docker container running in the background or another terminal.  
+You should have run migrations before trying to run the application.
 ```bash
 fastapi dev
 ```

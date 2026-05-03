@@ -22,8 +22,7 @@ class OrgFileRecordResponse(BaseModel):
     Response from creating the database record
     """
 
-    model_config = ConfigDict(from_attributes=True)
-    id: int
+    model_config = ConfigDict(from_attributes=True, extra="ignore")
     file_name: str
     unique_identifier: UUID
     file_size: float

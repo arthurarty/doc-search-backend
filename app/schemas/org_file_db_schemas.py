@@ -3,6 +3,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
+from app.models.organization_file import FileStatusEnum
+
 
 class CreateOrgFileRecordRequest(BaseModel):
     """
@@ -11,9 +13,11 @@ class CreateOrgFileRecordRequest(BaseModel):
 
     file_name: str
     unique_identifier: UUID
+    file_size: float
+    content_type: str
 
 
-class CreateOrgFileRecordResponse(BaseModel):
+class OrgFileRecordResponse(BaseModel):
     """
     Response from creating the database record
     """
@@ -22,6 +26,8 @@ class CreateOrgFileRecordResponse(BaseModel):
     id: int
     file_name: str
     unique_identifier: UUID
+    file_size: float
+    content_type: str
+    status: FileStatusEnum
     created_at: datetime
     updated_at: datetime
-    deleted_at: datetime | None

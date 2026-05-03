@@ -7,7 +7,10 @@ from app.clients.org_file_db_client import OrgFileDatabaseClient
 from app.config import settings
 from app.schemas.cloud_storage_schemas import SignedUrlRequest, SignedUrlResponse
 from app.schemas.file_upload_schemas import FileUploadRequest
-from app.schemas.org_file_db_schemas import CreateOrgFileRecordRequest
+from app.schemas.org_file_db_schemas import (
+    CreateOrgFileRecordRequest,
+    OrgFileRecordResponse,
+)
 from app.services.cloud_storage_service import CloudStorageService
 from app.utils.file_utils import get_file_extension
 
@@ -56,6 +59,18 @@ class DocumentService:
             org_file_request=CreateOrgFileRecordRequest(
                 file_name=file_upload_request.file_name,
                 unique_identifier=file_identifier,
+                file_size=file_upload_request.file_size,
+                content_type=file_upload_request.content_type,
             ),
         )
         return signed_url_response
+
+    async def get_org_file_by_unique_identifier(
+        self, db_session: AsyncSession, unique_identifier: UUID
+    ) -> OrgFileRecordResponse:
+        """
+        Get a single organization_file by its unique_identifier.
+        """
+        return await self.org_file_db_client.get_by_unique_identifier(
+            db_session, unique_identifier
+        )

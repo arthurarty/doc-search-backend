@@ -1,8 +1,8 @@
 """initial migration
 
-Revision ID: 232c263461d2
+Revision ID: 7126dfc79357
 Revises:
-Create Date: 2026-05-03 12:55:00.102075
+Create Date: 2026-05-03 18:55:26.027013
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "232c263461d2"
+revision: str = "7126dfc79357"
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -26,6 +26,23 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("unique_identifier", sa.Uuid(), nullable=False),
         sa.Column("file_name", sa.String(), nullable=False),
+        sa.Column("file_size", sa.Float(), nullable=False),
+        sa.Column("content_type", sa.String(), nullable=False),
+        sa.Column(
+            "status",
+            sa.Enum(
+                "QUEUED_FOR_UPLOAD",
+                "UPLOADING",
+                "UPLOADED",
+                "UPLOAD_FAILED",
+                "INDEXING",
+                "INDEXED",
+                "INDEXING_FAILED",
+                "FAILED",
+                name="filestatusenum",
+            ),
+            nullable=False,
+        ),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -38,7 +55,6 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_organization_files")),
     )
     op.create_index(

@@ -1,9 +1,10 @@
 from pydantic import BaseModel
 
 
-class FileUploadRequest(BaseModel):
-    file_name: str
+class SignedUrlRequest(BaseModel):
+    blob_name: str
     content_type: str
+    expiry_time: int
 
 
 class SignedUrlResponse(BaseModel):

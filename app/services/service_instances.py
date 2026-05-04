@@ -12,5 +12,5 @@ cloud_storage_service = CloudStorageService(
 )
 document_service = DocumentService(
     cloud_storage_service=cloud_storage_service,
-    org_file_db_client=DocumentDbClient(),
+    db_client=DocumentDbClient(),
 )

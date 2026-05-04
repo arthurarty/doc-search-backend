@@ -26,10 +26,10 @@ class DocumentService:
 
     def __init__(
         self,
-        org_file_db_client: DocumentDbClient,
+        db_client: DocumentDbClient,
         cloud_storage_service: CloudStorageService,
     ):
-        self.org_file_db_client = org_file_db_client
+        self.db_client = db_client
         self.cloud_storage_service = cloud_storage_service
 
     def create_signed_url(
@@ -58,7 +58,7 @@ class DocumentService:
             file_upload_request, file_identifier
         )
         # Todo: Add exception handling for signed_url creation
-        await self.org_file_db_client.create(
+        await self.db_client.create(
             db_session=db_session,
             org_file_request=CreateOrgFileRecordRequest(
                 file_name=file_upload_request.file_name,
@@ -79,7 +79,7 @@ class DocumentService:
         """
         Get a single organization_file by its unique_identifier.
         """
-        org_file = await self.org_file_db_client.get_by_unique_identifier(
+        org_file = await self.db_client.get_by_unique_identifier(
             db_session, unique_identifier
         )
         if org_file:
@@ -89,7 +89,7 @@ class DocumentService:
     async def get_documents(
         self, db_session: AsyncSession, skip: int | None = 0, limit: int | None = 25
     ) -> List[DocResponse]:
-        org_files = await self.org_file_db_client.get_documents(
+        org_files = await self.db_client.get_documents(
             db_session, limit=limit, skip=skip
         )
         return [DocResponse.model_validate(org_file) for org_file in org_files]
@@ -105,7 +105,7 @@ class DocumentService:
         This triggers a background task to index the document once
         Document has been uploaded to storage.
         """
-        return await self.org_file_db_client.update_document_status(
+        return await self.db_client.update_document_status(
             db_session,
             UpdateOrgFileRecordRequest(
                 unique_identifier=unique_identifier,

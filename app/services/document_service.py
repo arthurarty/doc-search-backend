@@ -1,4 +1,5 @@
 import uuid
+from typing import List
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,8 +7,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.clients.org_file_db_client import OrgFileDatabaseClient
 from app.config import settings
 from app.schemas.cloud_storage_schemas import SignedUrlRequest, SignedUrlResponse
-from app.schemas.file_upload_schemas import FileUploadRequest
-from app.schemas.org_file_db_schemas import CreateOrgFileRecordRequest
+from app.schemas.document_schemas import (
+    CreateDocRequest,
+    CreateDocResponse,
+    DocResponse,
+    UpdateDocRequest,
+)
+from app.schemas.org_file_db_schemas import (
+    CreateOrgFileRecordRequest,
+    UpdateOrgFileRecordRequest,
+)
 from app.services.cloud_storage_service import CloudStorageService
 from app.utils.file_utils import get_file_extension
 
@@ -26,7 +35,7 @@ class DocumentService:
         self.cloud_storage_service = cloud_storage_service
 
     def create_signed_url(
-        self, file_upload_request: FileUploadRequest, file_identifier: UUID
+        self, file_upload_request: CreateDocRequest, file_identifier: UUID
     ) -> SignedUrlResponse:
         file_extension = get_file_extension(file_upload_request.file_name)
         blob_name = f"{file_identifier.hex}.{file_extension}"
@@ -40,8 +49,8 @@ class DocumentService:
         )
 
     async def process_file_upload(
-        self, db_session: AsyncSession, file_upload_request: FileUploadRequest
-    ) -> SignedUrlResponse:
+        self, db_session: AsyncSession, file_upload_request: CreateDocRequest
+    ) -> CreateDocResponse:
         """
         Creates a signed url that can be used to upload a file.
         Creates database entry in the OrganizationFile table.
@@ -56,6 +65,47 @@ class DocumentService:
             org_file_request=CreateOrgFileRecordRequest(
                 file_name=file_upload_request.file_name,
                 unique_identifier=file_identifier,
+                file_size=file_upload_request.file_size,
+                content_type=file_upload_request.content_type,
             ),
         )
-        return signed_url_response
+        return CreateDocResponse(
+            blob_name=signed_url_response.blob_name,
+            signed_url=signed_url_response.signed_url,
+            unique_identifier=file_identifier,
+        )
+
+    async def get_org_file_by_unique_identifier(
+        self, db_session: AsyncSession, unique_identifier: UUID
+    ) -> DocResponse | None:
+        """
+        Get a single organization_file by its unique_identifier.
+        """
+        org_file = await self.org_file_db_client.get_by_unique_identifier(
+            db_session, unique_identifier
+        )
+        if org_file:
+            return DocResponse.model_validate(org_file)
+        return None
+
+    async def get_org_files(
+        self, db_session: AsyncSession, skip: int | None = 0, limit: int | None = 25
+    ) -> List[DocResponse]:
+        org_files = await self.org_file_db_client.get_org_files(
+            db_session, limit=limit, skip=skip
+        )
+        return [DocResponse.model_validate(org_file) for org_file in org_files]
+
+    async def update_document_status(
+        self,
+        db_session: AsyncSession,
+        unique_identifier: UUID,
+        update_request: UpdateDocRequest,
+    ) -> int:
+        return await self.org_file_db_client.update_org_file_status(
+            db_session,
+            UpdateOrgFileRecordRequest(
+                unique_identifier=unique_identifier,
+                status=update_request.status,
+            ),
+        )

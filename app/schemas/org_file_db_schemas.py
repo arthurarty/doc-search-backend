@@ -1,7 +1,13 @@
-from datetime import datetime
+"""
+The schemas in this file are not using facing.
+i.e they are for internal services only.
+"""
+
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
+
+from app.models.organization_file import FileStatusEnum
 
 
 class CreateOrgFileRecordRequest(BaseModel):
@@ -11,17 +17,14 @@ class CreateOrgFileRecordRequest(BaseModel):
 
     file_name: str
     unique_identifier: UUID
+    file_size: float
+    content_type: str
 
 
-class CreateOrgFileRecordResponse(BaseModel):
+class UpdateOrgFileRecordRequest(BaseModel):
     """
-    Response from creating the database record
+    Used to update an org file.
     """
 
-    model_config = ConfigDict(from_attributes=True)
-    id: int
-    file_name: str
     unique_identifier: UUID
-    created_at: datetime
-    updated_at: datetime
-    deleted_at: datetime | None
+    status: FileStatusEnum

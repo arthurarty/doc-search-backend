@@ -32,7 +32,6 @@ class Base(AsyncAttrs, DeclarativeBase):
 
 engine = create_async_engine(
     settings.SQLALCHEMY_DATABASE_URL,
-    echo=True,
 )
 
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)

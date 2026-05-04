@@ -27,6 +27,13 @@ class UpdateOrgFileRecordRequest(BaseModel):
     status: DocumentStatusEnum
 
 
+class CreateDocumentEmbeddingRequest(BaseModel):
+    embeddings: list
+    document_id: int
+    content_metadata: dict
+    content: str
+
+
 # # # # External schemas used by API endpoints # # # #
 
 

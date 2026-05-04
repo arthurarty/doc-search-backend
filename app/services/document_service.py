@@ -58,7 +58,7 @@ class DocumentService:
             file_upload_request, file_identifier
         )
         # Todo: Add exception handling for signed_url creation
-        await self.db_client.create(
+        await self.db_client.create_document(
             db_session=db_session,
             org_file_request=CreateOrgFileRecordRequest(
                 file_name=file_upload_request.file_name,
@@ -79,20 +79,20 @@ class DocumentService:
         """
         Get a single organization_file by its unique_identifier.
         """
-        org_file = await self.db_client.get_by_unique_identifier(
+        document = await self.db_client.get_by_unique_identifier(
             db_session, unique_identifier
         )
-        if org_file:
-            return DocResponse.model_validate(org_file)
+        if document:
+            return DocResponse.model_validate(document)
         return None
 
     async def get_documents(
         self, db_session: AsyncSession, skip: int | None = 0, limit: int | None = 25
     ) -> List[DocResponse]:
-        org_files = await self.db_client.get_documents(
+        documents = await self.db_client.get_documents(
             db_session, limit=limit, skip=skip
         )
-        return [DocResponse.model_validate(org_file) for org_file in org_files]
+        return [DocResponse.model_validate(document) for document in documents]
 
     async def update_document_status(
         self,

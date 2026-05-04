@@ -4,8 +4,9 @@ from uuid import UUID
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.documents import Document
+from app.models.documents import Document, DocumentEmbeddings
 from app.schemas.document_schemas import (
+    CreateDocumentEmbeddingRequest,
     CreateOrgFileRecordRequest,
     UpdateOrgFileRecordRequest,
 )
@@ -19,7 +20,7 @@ class DocumentDbClient:
     def __init__(self):
         pass
 
-    async def create(
+    async def create_document(
         self, db_session: AsyncSession, org_file_request: CreateOrgFileRecordRequest
     ) -> Document:
         """
@@ -69,3 +70,14 @@ class DocumentDbClient:
         result = await db_session.execute(query)
         await db_session.commit()
         return result.rowcount
+
+    async def create_document_embedding(
+        self,
+        db_session: AsyncSession,
+        create_embedding_request: CreateDocumentEmbeddingRequest,
+    ):
+        doc_embedding = DocumentEmbeddings(**create_embedding_request.model_dump())
+        db_session.add(doc_embedding)
+        await db_session.commit(doc_embedding)
+        await db_session.refresh(doc_embedding)
+        return doc_embedding

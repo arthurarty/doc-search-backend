@@ -11,7 +11,7 @@ from app.schemas.document_schemas import (
 )
 
 
-class OrgFileDatabaseClient:
+class DocumentDbClient:
     """
     This client handles crud operations on the database.
     """
@@ -40,7 +40,7 @@ class OrgFileDatabaseClient:
         result_object = await db_session.execute(query)
         return result_object.scalar_one_or_none()
 
-    async def get_org_files(
+    async def get_documents(
         self, db_session: AsyncSession, limit: int, skip: int
     ) -> List[Document]:
         """
@@ -50,7 +50,7 @@ class OrgFileDatabaseClient:
         result_object = await db_session.execute(query)
         return result_object.scalars().all()
 
-    async def update_org_file_status(
+    async def update_document_status(
         self,
         db_session: AsyncSession,
         update_org_file_request: UpdateOrgFileRecordRequest,

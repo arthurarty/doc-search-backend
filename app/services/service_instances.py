@@ -1,5 +1,5 @@
+from app.clients.db_client import DocumentDbClient
 from app.clients.google_cloud_client import GoogleCloudClient
-from app.clients.org_file_db_client import OrgFileDatabaseClient
 from app.config import settings
 from app.services.cloud_storage_service import CloudStorageService
 from app.services.document_service import DocumentService
@@ -12,5 +12,5 @@ cloud_storage_service = CloudStorageService(
 )
 document_service = DocumentService(
     cloud_storage_service=cloud_storage_service,
-    org_file_db_client=OrgFileDatabaseClient(),
+    org_file_db_client=DocumentDbClient(),
 )

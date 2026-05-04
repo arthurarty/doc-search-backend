@@ -4,7 +4,7 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.clients.org_file_db_client import OrgFileDatabaseClient
+from app.clients.db_client import DocumentDbClient
 from app.config import settings
 from app.schemas.cloud_storage_schemas import SignedUrlRequest, SignedUrlResponse
 from app.schemas.document_schemas import (
@@ -26,7 +26,7 @@ class DocumentService:
 
     def __init__(
         self,
-        org_file_db_client: OrgFileDatabaseClient,
+        org_file_db_client: DocumentDbClient,
         cloud_storage_service: CloudStorageService,
     ):
         self.org_file_db_client = org_file_db_client
@@ -89,7 +89,7 @@ class DocumentService:
     async def get_documents(
         self, db_session: AsyncSession, skip: int | None = 0, limit: int | None = 25
     ) -> List[DocResponse]:
-        org_files = await self.org_file_db_client.get_org_files(
+        org_files = await self.org_file_db_client.get_documents(
             db_session, limit=limit, skip=skip
         )
         return [DocResponse.model_validate(org_file) for org_file in org_files]
@@ -105,7 +105,7 @@ class DocumentService:
         This triggers a background task to index the document once
         Document has been uploaded to storage.
         """
-        return await self.org_file_db_client.update_org_file_status(
+        return await self.org_file_db_client.update_document_status(
             db_session,
             UpdateOrgFileRecordRequest(
                 unique_identifier=unique_identifier,

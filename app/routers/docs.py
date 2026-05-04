@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, status
 from typing import List, Annotated
 
 from app.dependencies import DatabaseSessionDep, DocumentServiceDep
@@ -11,7 +11,8 @@ from app.schemas.org_file_db_schemas import OrgFileRecordResponse
 router = APIRouter(prefix="/docs")
 
 
-@router.post("/signed-url/", tags=["docs"], response_model=SignedUrlResponse)
+@router.post(
+    "/signed-url/", tags=["docs"], response_model=SignedUrlResponse, status_code=status.HTTP_201_CREATED)
 async def create_signed_url(
     file_upload_request: FileUploadRequest,
     document_service: DocumentServiceDep,
@@ -27,7 +28,7 @@ async def create_signed_url(
 
 
 @router.get(
-    "/{unique_identifier}", tags=["docs"], response_model=OrgFileRecordResponse | None
+    "/{unique_identifier}", tags=["docs"], response_model=OrgFileRecordResponse | None, status_code=status.HTTP_200_OK
 )
 async def get_document_by_uuid(
     unique_identifier: UUID,
@@ -42,7 +43,8 @@ async def get_document_by_uuid(
         unique_identifier=unique_identifier,
     )
 
-@router.get("/", tags=["docs"], response_model=List[OrgFileRecordResponse])
+@router.get(
+    "/", tags=["docs"], response_model=List[OrgFileRecordResponse], status_code=status.HTTP_200_OK)
 async def get_documents(
     document_service: DocumentServiceDep,
     db_session: DatabaseSessionDep,

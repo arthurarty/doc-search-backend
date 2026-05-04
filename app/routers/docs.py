@@ -2,10 +2,11 @@ from typing import Annotated, List
 from uuid import UUID
 
 from fastapi import APIRouter, Query, status
+from fastapi.responses import JSONResponse
 
 from app.dependencies import DatabaseSessionDep, DocumentServiceDep
 from app.schemas.cloud_storage_schemas import SignedUrlResponse
-from app.schemas.file_upload_schemas import FileUploadRequest
+from app.schemas.document_schemas import DocUpdateRequest, DocUploadRequest
 from app.schemas.org_file_db_schemas import OrgFileRecordResponse
 
 router = APIRouter(prefix="/docs")
@@ -18,7 +19,7 @@ router = APIRouter(prefix="/docs")
     status_code=status.HTTP_201_CREATED,
 )
 async def create_signed_url(
-    file_upload_request: FileUploadRequest,
+    file_upload_request: DocUploadRequest,
     document_service: DocumentServiceDep,
     db_session: DatabaseSessionDep,
 ) -> SignedUrlResponse:
@@ -36,18 +37,50 @@ async def create_signed_url(
     tags=["docs"],
     response_model=OrgFileRecordResponse | None,
     status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Document not found",
+            "content": {
+                "application/json": {"example": {"detail": "Document not found"}}
+            },
+        }
+    },
 )
-async def get_document_by_uuid(
+async def get_document(
     unique_identifier: UUID,
+    document_service: DocumentServiceDep,
+    db_session: DatabaseSessionDep,
+) -> OrgFileRecordResponse | JSONResponse | None:
+    """
+    Retrieve  a single document from the database.
+    """
+    response = await document_service.get_org_file_by_unique_identifier(
+        db_session=db_session,
+        unique_identifier=unique_identifier,
+    )
+    if response:
+        return response
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND, content={"detail": "Document not found"}
+    )
+
+
+@router.put(
+    "/{unique_identifier}",
+    tags=["docs"],
+    status_code=status.HTTP_200_OK,
+)
+async def update_document(
+    unique_identifier: UUID,
+    update_request: DocUpdateRequest,
     document_service: DocumentServiceDep,
     db_session: DatabaseSessionDep,
 ) -> OrgFileRecordResponse | None:
     """
-    Retrieve  a single document from the database.
+    Update a single document
     """
-    return await document_service.get_org_file_by_unique_identifier(
-        db_session=db_session,
-        unique_identifier=unique_identifier,
+    return await document_service.update_document_status(
+        db_session,
     )
 
 

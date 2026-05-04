@@ -1,3 +1,5 @@
+from collections.abc import Iterator
+
 from app.clients.google_cloud_client import GoogleCloudClient
 from app.schemas.cloud_storage_schemas import SignedUrlRequest, SignedUrlResponse
 
@@ -27,4 +29,13 @@ class CloudStorageService:
         return SignedUrlResponse(
             signed_url=signed_url,
             blob_name=blob_name,
+        )
+
+    def read_blob_contents(self, blob_path: str) -> Iterator[str]:
+        """
+        Reads the blob contents, one page at a time.
+        """
+        yield from self.google_cloud_client.stream_file_contents(
+            bucket_name=self.bucket_name,
+            blob_path=blob_path,
         )

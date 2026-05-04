@@ -4,17 +4,15 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.clients.org_file_db_client import OrgFileDatabaseClient
+from app.clients.db_client import DocumentDbClient
 from app.config import settings
 from app.schemas.cloud_storage_schemas import SignedUrlRequest, SignedUrlResponse
 from app.schemas.document_schemas import (
     CreateDocRequest,
     CreateDocResponse,
+    CreateOrgFileRecordRequest,
     DocResponse,
     UpdateDocRequest,
-)
-from app.schemas.org_file_db_schemas import (
-    CreateOrgFileRecordRequest,
     UpdateOrgFileRecordRequest,
 )
 from app.services.cloud_storage_service import CloudStorageService
@@ -28,10 +26,10 @@ class DocumentService:
 
     def __init__(
         self,
-        org_file_db_client: OrgFileDatabaseClient,
+        db_client: DocumentDbClient,
         cloud_storage_service: CloudStorageService,
     ):
-        self.org_file_db_client = org_file_db_client
+        self.db_client = db_client
         self.cloud_storage_service = cloud_storage_service
 
     def create_signed_url(
@@ -60,7 +58,7 @@ class DocumentService:
             file_upload_request, file_identifier
         )
         # Todo: Add exception handling for signed_url creation
-        await self.org_file_db_client.create(
+        await self.db_client.create_document(
             db_session=db_session,
             org_file_request=CreateOrgFileRecordRequest(
                 file_name=file_upload_request.file_name,
@@ -75,26 +73,26 @@ class DocumentService:
             unique_identifier=file_identifier,
         )
 
-    async def get_org_file_by_unique_identifier(
+    async def get_document_by_unique_identifier(
         self, db_session: AsyncSession, unique_identifier: UUID
     ) -> DocResponse | None:
         """
         Get a single organization_file by its unique_identifier.
         """
-        org_file = await self.org_file_db_client.get_by_unique_identifier(
+        document = await self.db_client.get_by_unique_identifier(
             db_session, unique_identifier
         )
-        if org_file:
-            return DocResponse.model_validate(org_file)
+        if document:
+            return DocResponse.model_validate(document)
         return None
 
-    async def get_org_files(
+    async def get_documents(
         self, db_session: AsyncSession, skip: int | None = 0, limit: int | None = 25
     ) -> List[DocResponse]:
-        org_files = await self.org_file_db_client.get_org_files(
+        documents = await self.db_client.get_documents(
             db_session, limit=limit, skip=skip
         )
-        return [DocResponse.model_validate(org_file) for org_file in org_files]
+        return [DocResponse.model_validate(document) for document in documents]
 
     async def update_document_status(
         self,
@@ -102,7 +100,12 @@ class DocumentService:
         unique_identifier: UUID,
         update_request: UpdateDocRequest,
     ) -> int:
-        return await self.org_file_db_client.update_org_file_status(
+        """
+        Update the status of a document.
+        This triggers a background task to index the document once
+        Document has been uploaded to storage.
+        """
+        return await self.db_client.update_document_status(
             db_session,
             UpdateOrgFileRecordRequest(
                 unique_identifier=unique_identifier,

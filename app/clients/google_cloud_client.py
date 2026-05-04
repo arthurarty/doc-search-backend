@@ -1,7 +1,9 @@
 import datetime
+from collections.abc import Iterator
 
 from google.cloud import storage
 from google.oauth2 import service_account
+from pypdf import PdfReader
 
 
 class GoogleCloudClient:
@@ -35,3 +37,16 @@ class GoogleCloudClient:
             content_type=content_type,
         )
         return url
+
+    def stream_file_contents(self, bucket_name: str, blob_path: str) -> Iterator[str]:
+        """
+        Reads a single page at a time and yields its text.
+        """
+        storage_client = storage.Client(credentials=self.credentials)
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(blob_path)
+        with blob.open("rb") as f:
+            reader = PdfReader(f)
+            for page in reader.pages:
+                text = page.extract_text()
+                yield text

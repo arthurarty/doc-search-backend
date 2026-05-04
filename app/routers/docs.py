@@ -1,6 +1,7 @@
 from uuid import UUID
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
+from typing import List, Annotated
 
 from app.dependencies import DatabaseSessionDep, DocumentServiceDep
 from app.schemas.cloud_storage_schemas import SignedUrlResponse
@@ -40,3 +41,15 @@ async def get_document_by_uuid(
         db_session=db_session,
         unique_identifier=unique_identifier,
     )
+
+@router.get("/", tags=["docs"], response_model=List[OrgFileRecordResponse])
+async def get_documents(
+    document_service: DocumentServiceDep,
+    db_session: DatabaseSessionDep,
+    limit: Annotated[int, Query(le=100)] = 25,
+    skip: Annotated[int, Query(ge=0)] = 0,
+) -> List[OrgFileRecordResponse]:
+    """
+    Get documents from the database, ordered in descending order by created_at date
+    """
+    return await document_service.get_org_files(db_session, limit=limit, skip=skip)

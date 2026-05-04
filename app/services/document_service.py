@@ -2,7 +2,7 @@ import uuid
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from typing import List
 from app.clients.org_file_db_client import OrgFileDatabaseClient
 from app.config import settings
 from app.schemas.cloud_storage_schemas import SignedUrlRequest, SignedUrlResponse
@@ -73,4 +73,12 @@ class DocumentService:
         """
         return await self.org_file_db_client.get_by_unique_identifier(
             db_session, unique_identifier
+        )
+
+    async def get_org_files(
+        self,
+        db_session: AsyncSession, skip: int | None = 0, limit: int | None = 25
+    ) -> List[OrgFileRecordResponse]:
+        return await self.org_file_db_client.get_org_files(
+            db_session, limit=limit, skip=skip
         )

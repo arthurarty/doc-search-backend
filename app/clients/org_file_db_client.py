@@ -41,3 +41,19 @@ class OrgFileDatabaseClient:
         if org_file:
             return OrgFileRecordResponse.model_validate(org_file)
         return None
+
+    async def get_org_files(
+        self,
+        db_session: AsyncSession,
+        limit: int,
+        skip: int
+    ):
+        """
+        Get org_files ordered in descending order by created_at date.
+        """
+        query = select(
+            OrganizationFile
+        ).limit(limit).offset(skip).order_by(OrganizationFile.created_at)
+        result_object = await db_session.execute(query)
+        org_files = result_object.scalars().all()
+        return [OrgFileRecordResponse.model_validate(org_file) for org_file in org_files]

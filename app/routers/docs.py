@@ -7,9 +7,9 @@ from fastapi.responses import JSONResponse
 from app.dependencies import DatabaseSessionDep, DocumentServiceDep
 from app.schemas.cloud_storage_schemas import SignedUrlResponse
 from app.schemas.document_schemas import (
-    DocUpdateRequest,
-    DocUploadRequest,
-    OrgFileRecordResponse,
+    CreateDocRequest,
+    DocResponse,
+    UpdateDocRequest,
 )
 
 router = APIRouter(prefix="/docs")
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/docs")
     status_code=status.HTTP_201_CREATED,
 )
 async def create_signed_url(
-    file_upload_request: DocUploadRequest,
+    file_upload_request: CreateDocRequest,
     document_service: DocumentServiceDep,
     db_session: DatabaseSessionDep,
 ) -> SignedUrlResponse:
@@ -38,7 +38,7 @@ async def create_signed_url(
 @router.get(
     "/{unique_identifier}",
     tags=["docs"],
-    response_model=OrgFileRecordResponse | None,
+    response_model=DocResponse | None,
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -53,7 +53,7 @@ async def get_document(
     unique_identifier: UUID,
     document_service: DocumentServiceDep,
     db_session: DatabaseSessionDep,
-) -> OrgFileRecordResponse | JSONResponse | None:
+) -> DocResponse | JSONResponse | None:
     """
     Retrieve  a single document from the database.
     """
@@ -75,24 +75,30 @@ async def get_document(
 )
 async def update_document(
     unique_identifier: UUID,
-    update_request: DocUpdateRequest,
+    update_request: UpdateDocRequest,
     document_service: DocumentServiceDep,
     db_session: DatabaseSessionDep,
-) -> OrgFileRecordResponse | None:
+) -> DocResponse | None:
     """
     Update a single document
     """
-    return await document_service.update_document_status(
+    row_count = await document_service.update_document_status(
         db_session,
         unique_identifier=unique_identifier,
         update_request=update_request,
     )
+    if not row_count:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"detail": "Document not found"},
+        )
+    return None
 
 
 @router.get(
     "/",
     tags=["docs"],
-    response_model=List[OrgFileRecordResponse],
+    response_model=List[DocResponse],
     status_code=status.HTTP_200_OK,
 )
 async def get_documents(
@@ -100,7 +106,7 @@ async def get_documents(
     db_session: DatabaseSessionDep,
     limit: Annotated[int, Query(le=100)] = 25,
     skip: Annotated[int, Query(ge=0)] = 0,
-) -> List[OrgFileRecordResponse]:
+) -> List[DocResponse]:
     """
     Get documents from the database, ordered in descending order by created_at date
     """

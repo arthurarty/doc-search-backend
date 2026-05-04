@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.organization_file import OrganizationFile
@@ -59,5 +59,19 @@ class OrgFileDatabaseClient:
         self,
         db_session: AsyncSession,
         update_org_file_request: UpdateOrgFileRecordRequest,
-    ):
-        pass
+    ) -> int:
+        """
+        Updates the status of a document.
+        Returns: No of records affected
+        """
+        query = (
+            update(OrganizationFile)
+            .where(
+                OrganizationFile.unique_identifier
+                == update_org_file_request.unique_identifier
+            )
+            .values(status=update_org_file_request.status)
+        )
+        result = await db_session.execute(query)
+        await db_session.commit()
+        return result.rowcount

@@ -10,18 +10,18 @@ from pydantic import BaseModel, ConfigDict
 from app.models.organization_file import FileStatusEnum
 
 
-class DocUploadRequest(BaseModel):
+class CreateDocRequest(BaseModel):
     file_name: str
     content_type: str
     file_size: float
 
 
-class DocUpdateRequest(BaseModel):
+class UpdateDocRequest(BaseModel):
 
     status: FileStatusEnum
 
 
-class OrgFileRecordResponse(BaseModel):
+class DocResponse(BaseModel):
     """
     Response from creating the database record
     """

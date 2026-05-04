@@ -28,7 +28,7 @@ class UpdateOrgFileRecordRequest(BaseModel):
 
 
 class CreateDocumentEmbeddingRequest(BaseModel):
-    embeddings: list
+    embedding: list
     document_id: int
     content_metadata: dict
     content: str

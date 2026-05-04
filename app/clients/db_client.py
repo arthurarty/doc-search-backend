@@ -78,6 +78,6 @@ class DocumentDbClient:
     ):
         doc_embedding = DocumentEmbeddings(**create_embedding_request.model_dump())
         db_session.add(doc_embedding)
-        await db_session.commit(doc_embedding)
+        await db_session.commit()
         await db_session.refresh(doc_embedding)
         return doc_embedding

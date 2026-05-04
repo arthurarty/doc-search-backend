@@ -23,11 +23,11 @@ async def process_document(blob_path: str, document_id: int):
         embeddings_model = OllamaEmbeddings(model="nomic-embed-text")
         async with async_session_maker() as session:
             for text in texts:
-                embeddings = embeddings_model.embed_query(text)
+                embedding = embeddings_model.embed_query(text)
                 await db_client.create_document_embedding(
                     session,
                     CreateDocumentEmbeddingRequest(
-                        embeddings=embeddings,
+                        embedding=embedding,
                         document_id=document_id,
                         content_metadata={
                             "page_id": i,

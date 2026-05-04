@@ -57,7 +57,7 @@ async def get_document(
     """
     Retrieve  a single document from the database.
     """
-    response = await document_service.get_org_file_by_unique_identifier(
+    response = await document_service.get_document_by_unique_identifier(
         db_session=db_session,
         unique_identifier=unique_identifier,
     )
@@ -120,4 +120,4 @@ async def get_documents(
     """
     Get documents from the database, ordered in descending order by created_at date
     """
-    return await document_service.get_org_files(db_session, limit=limit, skip=skip)
+    return await document_service.get_documents(db_session, limit=limit, skip=skip)

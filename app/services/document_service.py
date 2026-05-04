@@ -73,7 +73,7 @@ class DocumentService:
             unique_identifier=file_identifier,
         )
 
-    async def get_org_file_by_unique_identifier(
+    async def get_document_by_unique_identifier(
         self, db_session: AsyncSession, unique_identifier: UUID
     ) -> DocResponse | None:
         """
@@ -86,7 +86,7 @@ class DocumentService:
             return DocResponse.model_validate(org_file)
         return None
 
-    async def get_org_files(
+    async def get_documents(
         self, db_session: AsyncSession, skip: int | None = 0, limit: int | None = 25
     ) -> List[DocResponse]:
         org_files = await self.org_file_db_client.get_org_files(
@@ -100,6 +100,11 @@ class DocumentService:
         unique_identifier: UUID,
         update_request: UpdateDocRequest,
     ) -> int:
+        """
+        Update the status of a document.
+        This triggers a background task to index the document once
+        Document has been uploaded to storage.
+        """
         return await self.org_file_db_client.update_org_file_status(
             db_session,
             UpdateOrgFileRecordRequest(

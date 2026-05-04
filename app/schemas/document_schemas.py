@@ -1,13 +1,33 @@
-"""
-These schemas are user facing, i.e are exposed through the API.
-"""
-
 from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
 from app.models.documents import DocumentStatusEnum
+
+
+# # # # Internal Schemas # # # #
+class CreateOrgFileRecordRequest(BaseModel):
+    """
+    Used when creating a database record.
+    """
+
+    file_name: str
+    unique_identifier: UUID
+    file_size: float
+    content_type: str
+
+
+class UpdateOrgFileRecordRequest(BaseModel):
+    """
+    Used to update an org file.
+    """
+
+    unique_identifier: UUID
+    status: DocumentStatusEnum
+
+
+# # # # External schemas used by API endpoints # # # #
 
 
 class CreateDocRequest(BaseModel):

@@ -10,11 +10,9 @@ from app.schemas.cloud_storage_schemas import SignedUrlRequest, SignedUrlRespons
 from app.schemas.document_schemas import (
     CreateDocRequest,
     CreateDocResponse,
+    CreateOrgFileRecordRequest,
     DocResponse,
     UpdateDocRequest,
-)
-from app.schemas.org_file_db_schemas import (
-    CreateOrgFileRecordRequest,
     UpdateOrgFileRecordRequest,
 )
 from app.services.cloud_storage_service import CloudStorageService

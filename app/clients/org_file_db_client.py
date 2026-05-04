@@ -5,7 +5,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.documents import Document
-from app.schemas.org_file_db_schemas import (
+from app.schemas.document_schemas import (
     CreateOrgFileRecordRequest,
     UpdateOrgFileRecordRequest,
 )

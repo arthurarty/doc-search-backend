@@ -4,6 +4,7 @@ from app.config import settings
 from app.services.cloud_storage_service import CloudStorageService
 from app.services.document_service import DocumentService
 
+db_client = DocumentDbClient()
 cloud_storage_service = CloudStorageService(
     bucket_name=settings.GCP_STORAGE_BUCKET_NAME,
     google_cloud_client=GoogleCloudClient(
@@ -12,5 +13,5 @@ cloud_storage_service = CloudStorageService(
 )
 document_service = DocumentService(
     cloud_storage_service=cloud_storage_service,
-    db_client=DocumentDbClient(),
+    db_client=db_client,
 )

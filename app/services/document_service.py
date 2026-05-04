@@ -7,7 +7,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.clients.org_file_db_client import OrgFileDatabaseClient
 from app.config import settings
 from app.schemas.cloud_storage_schemas import SignedUrlRequest, SignedUrlResponse
-from app.schemas.document_schemas import CreateDocRequest, DocResponse, UpdateDocRequest
+from app.schemas.document_schemas import (
+    CreateDocRequest,
+    CreateDocResponse,
+    DocResponse,
+    UpdateDocRequest,
+)
 from app.schemas.org_file_db_schemas import (
     CreateOrgFileRecordRequest,
     UpdateOrgFileRecordRequest,
@@ -45,7 +50,7 @@ class DocumentService:
 
     async def process_file_upload(
         self, db_session: AsyncSession, file_upload_request: CreateDocRequest
-    ) -> SignedUrlResponse:
+    ) -> CreateDocResponse:
         """
         Creates a signed url that can be used to upload a file.
         Creates database entry in the OrganizationFile table.
@@ -64,7 +69,11 @@ class DocumentService:
                 content_type=file_upload_request.content_type,
             ),
         )
-        return signed_url_response
+        return CreateDocResponse(
+            blob_name=signed_url_response.blob_name,
+            signed_url=signed_url_response.signed_url,
+            unique_identifier=file_identifier,
+        )
 
     async def get_org_file_by_unique_identifier(
         self, db_session: AsyncSession, unique_identifier: UUID

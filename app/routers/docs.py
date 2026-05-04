@@ -5,9 +5,9 @@ from fastapi import APIRouter, Query, status
 from fastapi.responses import JSONResponse
 
 from app.dependencies import DatabaseSessionDep, DocumentServiceDep
-from app.schemas.cloud_storage_schemas import SignedUrlResponse
 from app.schemas.document_schemas import (
     CreateDocRequest,
+    CreateDocResponse,
     DocResponse,
     UpdateDocRequest,
 )
@@ -18,14 +18,14 @@ router = APIRouter(prefix="/docs")
 @router.post(
     "/signed-url/",
     tags=["docs"],
-    response_model=SignedUrlResponse,
+    response_model=CreateDocResponse,
     status_code=status.HTTP_201_CREATED,
 )
 async def create_signed_url(
     file_upload_request: CreateDocRequest,
     document_service: DocumentServiceDep,
     db_session: DatabaseSessionDep,
-) -> SignedUrlResponse:
+) -> CreateDocResponse:
     """
     Get a single signed url.
     How to use the signed url
@@ -71,16 +71,26 @@ async def get_document(
 @router.put(
     "/{unique_identifier}",
     tags=["docs"],
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Document not found",
+            "content": {
+                "application/json": {"example": {"detail": "Document not found"}}
+            },
+        }
+    },
 )
 async def update_document(
     unique_identifier: UUID,
     update_request: UpdateDocRequest,
     document_service: DocumentServiceDep,
     db_session: DatabaseSessionDep,
-) -> DocResponse | None:
+) -> None:
     """
-    Update a single document
+    Update a single document.
+
+    Returns: no content if successful
     """
     row_count = await document_service.update_document_status(
         db_session,

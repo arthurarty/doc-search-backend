@@ -16,6 +16,12 @@ class CreateDocRequest(BaseModel):
     file_size: float
 
 
+class CreateDocResponse(BaseModel):
+    signed_url: str
+    blob_name: str
+    unique_identifier: UUID
+
+
 class UpdateDocRequest(BaseModel):
 
     status: FileStatusEnum

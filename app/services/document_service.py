@@ -1,15 +1,16 @@
 import uuid
+from typing import List
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
+
 from app.clients.org_file_db_client import OrgFileDatabaseClient
 from app.config import settings
 from app.schemas.cloud_storage_schemas import SignedUrlRequest, SignedUrlResponse
-from app.schemas.file_upload_schemas import FileUploadRequest
+from app.schemas.document_schemas import DocUploadRequest, OrgFileRecordResponse
 from app.schemas.org_file_db_schemas import (
     CreateOrgFileRecordRequest,
-    OrgFileRecordResponse,
+    UpdateOrgFileRecordRequest,
 )
 from app.services.cloud_storage_service import CloudStorageService
 from app.utils.file_utils import get_file_extension
@@ -29,7 +30,7 @@ class DocumentService:
         self.cloud_storage_service = cloud_storage_service
 
     def create_signed_url(
-        self, file_upload_request: FileUploadRequest, file_identifier: UUID
+        self, file_upload_request: DocUploadRequest, file_identifier: UUID
     ) -> SignedUrlResponse:
         file_extension = get_file_extension(file_upload_request.file_name)
         blob_name = f"{file_identifier.hex}.{file_extension}"
@@ -43,7 +44,7 @@ class DocumentService:
         )
 
     async def process_file_upload(
-        self, db_session: AsyncSession, file_upload_request: FileUploadRequest
+        self, db_session: AsyncSession, file_upload_request: DocUploadRequest
     ) -> SignedUrlResponse:
         """
         Creates a signed url that can be used to upload a file.
@@ -67,18 +68,31 @@ class DocumentService:
 
     async def get_org_file_by_unique_identifier(
         self, db_session: AsyncSession, unique_identifier: UUID
-    ) -> OrgFileRecordResponse:
+    ) -> OrgFileRecordResponse | None:
         """
         Get a single organization_file by its unique_identifier.
         """
-        return await self.org_file_db_client.get_by_unique_identifier(
+        org_file = await self.org_file_db_client.get_by_unique_identifier(
             db_session, unique_identifier
         )
+        if org_file:
+            return OrgFileRecordResponse.model_validate(org_file)
+        return None
 
     async def get_org_files(
-        self,
-        db_session: AsyncSession, skip: int | None = 0, limit: int | None = 25
+        self, db_session: AsyncSession, skip: int | None = 0, limit: int | None = 25
     ) -> List[OrgFileRecordResponse]:
-        return await self.org_file_db_client.get_org_files(
+        org_files = await self.org_file_db_client.get_org_files(
             db_session, limit=limit, skip=skip
         )
+        return [
+            OrgFileRecordResponse.model_validate(org_file) for org_file in org_files
+        ]
+
+    async def update_document_status(
+        self,
+        db_session: AsyncSession,
+        unique_identifier: UUID,
+        update_request: UpdateOrgFileRecordRequest,
+    ):
+        pass

@@ -6,8 +6,11 @@ from fastapi.responses import JSONResponse
 
 from app.dependencies import DatabaseSessionDep, DocumentServiceDep
 from app.schemas.cloud_storage_schemas import SignedUrlResponse
-from app.schemas.document_schemas import DocUpdateRequest, DocUploadRequest
-from app.schemas.org_file_db_schemas import OrgFileRecordResponse
+from app.schemas.document_schemas import (
+    DocUpdateRequest,
+    DocUploadRequest,
+    OrgFileRecordResponse,
+)
 
 router = APIRouter(prefix="/docs")
 
@@ -81,6 +84,8 @@ async def update_document(
     """
     return await document_service.update_document_status(
         db_session,
+        unique_identifier=unique_identifier,
+        update_request=update_request,
     )
 
 

@@ -7,7 +7,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from app.models.organization_file import FileStatusEnum
+from app.models.documents import DocumentStatusEnum
 
 
 class CreateOrgFileRecordRequest(BaseModel):
@@ -27,4 +27,4 @@ class UpdateOrgFileRecordRequest(BaseModel):
     """
 
     unique_identifier: UUID
-    status: FileStatusEnum
+    status: DocumentStatusEnum

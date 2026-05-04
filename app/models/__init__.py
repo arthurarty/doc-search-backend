@@ -1,3 +1,3 @@
-from app.models.organization_file import OrganizationFile
+from app.models.documents import Document, DocumentEmbeddings
 
-__all__ = ["OrganizationFile"]
+__all__ = ["Document", "DocumentEmbeddings"]

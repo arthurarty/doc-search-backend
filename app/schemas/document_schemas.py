@@ -7,7 +7,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
-from app.models.organization_file import FileStatusEnum
+from app.models.documents import DocumentStatusEnum
 
 
 class CreateDocRequest(BaseModel):
@@ -24,7 +24,7 @@ class CreateDocResponse(BaseModel):
 
 class UpdateDocRequest(BaseModel):
 
-    status: FileStatusEnum
+    status: DocumentStatusEnum
 
 
 class DocResponse(BaseModel):
@@ -37,6 +37,6 @@ class DocResponse(BaseModel):
     unique_identifier: UUID
     file_size: float
     content_type: str
-    status: FileStatusEnum
+    status: DocumentStatusEnum
     created_at: datetime
     updated_at: datetime

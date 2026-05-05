@@ -83,6 +83,7 @@ def upgrade() -> None:
         "document_embeddings",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("document_id", sa.Integer(), nullable=False),
+        sa.Column("page_number", sa.Integer(), nullable=False),
         sa.Column(
             "content_metadata", postgresql.JSONB(astext_type=sa.Text()), nullable=False
         ),
@@ -94,6 +95,11 @@ def upgrade() -> None:
             name=op.f("fk_document_embeddings_document_id_documents"),
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_document_embeddings")),
+        sa.UniqueConstraint(
+            "document_id",
+            "page_number",
+            name="uq_document_embeddings_document_id_page_number",
+        ),
     )
     # ### end Alembic commands ###
 

@@ -2,6 +2,7 @@ from typing import List
 from uuid import UUID
 
 from sqlalchemy import select, update
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.documents import Document, DocumentEmbedding
@@ -87,10 +88,8 @@ class DocumentDbClient:
         db_session: AsyncSession,
         embedding_requests: List[CreateDocumentEmbeddingRequest],
     ) -> None:
-        doc_embeddings = [
-            DocumentEmbedding(**single_embedding.model_dump())
-            for single_embedding in embedding_requests
-        ]
-        db_session.add_all(doc_embeddings)
+        await db_session.execute(
+            pg_insert(DocumentEmbedding).on_conflict_do_update(),
+            [single_embedding.model_dump() for single_embedding in embedding_requests],
+        )
         await db_session.commit()
-        return

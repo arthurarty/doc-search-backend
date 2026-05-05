@@ -4,7 +4,7 @@ from typing import List
 from uuid import UUID, uuid7
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Enum, Float, ForeignKey, func
+from sqlalchemy import Enum, Float, ForeignKey, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -49,9 +49,17 @@ class Document(Base):
 
 class DocumentEmbedding(Base):
     __tablename__ = "document_embeddings"
+    __table_args__ = (
+        UniqueConstraint(
+            "document_id",
+            "page_number",
+            name="uq_document_embeddings_document_id_page_number",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     document_id: Mapped[int] = mapped_column(ForeignKey("documents.id"))
+    page_number: Mapped[int] = mapped_column()
     document: Mapped["Document"] = relationship(back_populates="embeddings")
     content_metadata: Mapped[dict] = mapped_column(JSONB, default=dict)
     content: Mapped[str] = mapped_column()

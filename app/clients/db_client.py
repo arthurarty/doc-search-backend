@@ -72,22 +72,15 @@ class DocumentDbClient:
         await db_session.commit()
         return result.rowcount
 
-    async def create_document_embedding(
-        self,
-        db_session: AsyncSession,
-        create_embedding_request: CreateDocumentEmbeddingRequest,
-    ) -> DocumentEmbedding:
-        doc_embedding = DocumentEmbedding(**create_embedding_request.model_dump())
-        db_session.add(doc_embedding)
-        await db_session.commit()
-        await db_session.refresh(doc_embedding)
-        return doc_embedding
-
     async def bulk_create_document_embeddings(
         self,
         db_session: AsyncSession,
         embedding_requests: List[CreateDocumentEmbeddingRequest],
     ) -> None:
+        """
+        Bulk create document embeddings.
+        On conflict, the new record overwrites the old.
+        """
         await db_session.execute(
             pg_insert(DocumentEmbedding).on_conflict_do_update(
                 constraint="uq_document_embeddings_document_id_page_number",

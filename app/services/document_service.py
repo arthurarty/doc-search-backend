@@ -2,6 +2,7 @@ import uuid
 from typing import List
 from uuid import UUID
 
+from celery import Task
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.clients.db_client import DocumentDbClient
@@ -17,7 +18,6 @@ from app.schemas.document_schemas import (
     UpdateOrgFileRecordRequest,
 )
 from app.services.cloud_storage_service import CloudStorageService
-from app.tasks.index_file import process_document
 from app.utils.file_utils import get_blob_name
 
 
@@ -100,6 +100,7 @@ class DocumentService:
         db_session: AsyncSession,
         unique_identifier: UUID,
         update_request: UpdateDocRequest,
+        document_process_fn: Task,
     ) -> int:
         """
         Update the status of a document.
@@ -114,5 +115,5 @@ class DocumentService:
             ),
         )
         if row_count and update_request.status == DocumentStatusEnum.UPLOADED:
-            process_document.delay(unique_identifier)
+            document_process_fn.delay(unique_identifier)
         return row_count

@@ -11,6 +11,7 @@ from app.schemas.document_schemas import (
     DocResponse,
     UpdateDocRequest,
 )
+from app.tasks.index_file import process_document
 
 router = APIRouter(prefix="/docs")
 
@@ -96,6 +97,7 @@ async def update_document(
         db_session,
         unique_identifier=unique_identifier,
         update_request=update_request,
+        document_process_fn=process_document,
     )
     if not row_count:
         return JSONResponse(

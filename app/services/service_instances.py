@@ -3,6 +3,7 @@ from app.clients.google_cloud_client import GoogleCloudClient
 from app.config import settings
 from app.services.cloud_storage_service import CloudStorageService
 from app.services.document_service import DocumentService
+from app.services.embedding_service import EmbeddingService
 
 db_client = DocumentDbClient()
 cloud_storage_service = CloudStorageService(
@@ -14,4 +15,7 @@ cloud_storage_service = CloudStorageService(
 document_service = DocumentService(
     cloud_storage_service=cloud_storage_service,
     db_client=db_client,
+)
+embedding_service = EmbeddingService(
+    db_client=db_client, cloud_storage_service=cloud_storage_service
 )

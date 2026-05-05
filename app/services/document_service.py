@@ -2,7 +2,6 @@ import uuid
 from typing import List
 from uuid import UUID
 
-from langchain_ollama import OllamaEmbeddings
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.clients.db_client import DocumentDbClient
@@ -14,7 +13,6 @@ from app.schemas.document_schemas import (
     CreateDocResponse,
     CreateOrgFileRecordRequest,
     DocResponse,
-    SemanticSearchResponse,
     UpdateDocRequest,
     UpdateOrgFileRecordRequest,
 )
@@ -35,10 +33,6 @@ class DocumentService:
     ):
         self.db_client = db_client
         self.cloud_storage_service = cloud_storage_service
-        self.embeddings_model = OllamaEmbeddings(
-            model=settings.EMBEDDINGS_MODEL,
-            base_url=settings.OLLAMA_BASE_URL,
-        )
 
     def create_signed_url(
         self, file_upload_request: CreateDocRequest, file_identifier: UUID
@@ -122,21 +116,3 @@ class DocumentService:
         if row_count and update_request.status == DocumentStatusEnum.UPLOADED:
             process_document.delay(unique_identifier)
         return row_count
-
-    async def semantic_search(
-        self, db_session: AsyncSession, input_query: str
-    ) -> List[SemanticSearchResponse]:
-        """
-        Creates embedding of input_query and searches for documents
-        """
-        embedding = self.embeddings_model.embed_query(input_query)
-        results = await self.db_client.document_embedding_lookup(db_session, embedding)
-        return [
-            SemanticSearchResponse(
-                file_name=result.document.file_name,
-                content=result.content,
-                content_metadata=result.content_metadata,
-                page_number=result.page_number,
-            )
-            for result in results
-        ]

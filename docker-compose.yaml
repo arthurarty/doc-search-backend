@@ -17,6 +17,19 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  app:
+    build: .
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/code
+
+    environment:
+      SQLALCHEMY_DATABASE_URL: postgresql+asyncpg://doc_search_user:docsearchPassword@db:5432/doc_search
+    depends_on:
+      db:
+        condition: service_healthy
+
 
 volumes:
   doc_search_db_data:

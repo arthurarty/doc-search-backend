@@ -53,7 +53,7 @@ class DocumentService:
         Creates a signed url that can be used to upload a file.
         Creates database entry in the OrganizationFile table.
         """
-        file_identifier = uuid.uuid4()
+        file_identifier = uuid.uuid7()
         signed_url_response = self.create_signed_url(
             file_upload_request, file_identifier
         )

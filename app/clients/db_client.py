@@ -1,10 +1,11 @@
 from typing import List
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import literal_column, select, update
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.documents import Document, DocumentEmbeddings
+from app.models.documents import Document, DocumentEmbedding
 from app.schemas.document_schemas import (
     CreateDocumentEmbeddingRequest,
     CreateOrgFileRecordRequest,
@@ -71,13 +72,24 @@ class DocumentDbClient:
         await db_session.commit()
         return result.rowcount
 
-    async def create_document_embedding(
+    async def bulk_create_document_embeddings(
         self,
         db_session: AsyncSession,
-        create_embedding_request: CreateDocumentEmbeddingRequest,
-    ):
-        doc_embedding = DocumentEmbeddings(**create_embedding_request.model_dump())
-        db_session.add(doc_embedding)
+        embedding_requests: List[CreateDocumentEmbeddingRequest],
+    ) -> None:
+        """
+        Bulk create document embeddings.
+        On conflict, the new record overwrites the old.
+        """
+        await db_session.execute(
+            pg_insert(DocumentEmbedding).on_conflict_do_update(
+                constraint="uq_document_embeddings_document_id_page_number",
+                set_={
+                    "content": literal_column("excluded.content"),
+                    "embedding": literal_column("excluded.embedding"),
+                    "content_metadata": literal_column("excluded.content_metadata"),
+                },
+            ),
+            [single_embedding.model_dump() for single_embedding in embedding_requests],
+        )
         await db_session.commit()
-        await db_session.refresh(doc_embedding)
-        return doc_embedding

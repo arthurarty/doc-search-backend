@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str
     SQLALCHEMY_DATABASE_URL: str
     VOYAGE_AI_KEY: str
+    EMBEDDINGS_MODEL: str
 
     model_config = SettingsConfigDict(env_file=".env")
 

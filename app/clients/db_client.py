@@ -3,6 +3,7 @@ from uuid import UUID
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models.documents import Document, DocumentEmbedding
 from app.schemas.document_schemas import (
@@ -108,6 +109,7 @@ class DocumentDbClient:
         distance = DocumentEmbedding.embedding.cosine_distance(search_embedding)
         query = (
             select(DocumentEmbedding)
+            .options(selectinload(DocumentEmbedding.document))
             .where(distance <= max_distance)
             .order_by(distance)
             .limit(limit)

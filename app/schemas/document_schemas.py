@@ -68,3 +68,14 @@ class DocResponse(BaseModel):
     status: DocumentStatusEnum
     created_at: datetime
     updated_at: datetime
+
+
+class SemanticSearchResponse(BaseModel):
+    """
+    Model returned by Semantic search
+    """
+
+    file_name: str
+    content_metadata: dict
+    content: str
+    page_number: int | None = None

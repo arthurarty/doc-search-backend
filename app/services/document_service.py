@@ -13,6 +13,7 @@ from app.schemas.document_schemas import (
     CreateDocResponse,
     CreateOrgFileRecordRequest,
     DocResponse,
+    SemanticSearchResponse,
     UpdateDocRequest,
     UpdateOrgFileRecordRequest,
 )
@@ -115,12 +116,20 @@ class DocumentService:
             ),
         )
 
-    async def semantic_search(self, db_session: AsyncSession, input_query: str):
+    async def semantic_search(
+        self, db_session: AsyncSession, input_query: str
+    ) -> List[SemanticSearchResponse]:
         """
         Creates embedding of input_query and searches for documents
         """
         embedding = self.embeddings_model.embed_query(input_query)
         results = await self.db_client.document_embedding_lookup(db_session, embedding)
-        for result in results:
-            print(f"Page_number: {result.page_number}")
-            print(result.content, end="\n\n\n")
+        return [
+            SemanticSearchResponse(
+                file_name=result.document.file_name,
+                content=result.content,
+                content_metadata=result.content_metadata,
+                page_number=result.page_number,
+            )
+            for result in results
+        ]

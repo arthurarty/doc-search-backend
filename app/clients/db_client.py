@@ -92,7 +92,18 @@ class DocumentDbClient:
         max_distance: float = 0.4,
     ) -> List[DocumentEmbedding]:
         """
-        Uses cosine_distance to look_up relevant documents
+        Uses cosine_distance to look up relevant documents.
+
+        Args:
+          db_session: Active async database session.
+          search_embedding: Vector embedding of the search query.
+          limit: Maximum number of results to return (default 5).
+          max_distance: Cosine distance threshold; 0 is an exact match, 2 is
+            the exact opposite — lower values yield more relevant results
+            (default 0.4).
+
+        Returns:
+          List of DocumentEmbedding rows ordered by ascending distance.
         """
         distance = DocumentEmbedding.embedding.cosine_distance(search_embedding)
         query = (

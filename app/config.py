@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     REDIS_HOST: str
     REDIS_PORT: str
     REDIS_DB: str
+    OLLAMA_BASE_URL: str
 
     model_config = SettingsConfigDict(env_file=".env")
 

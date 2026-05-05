@@ -35,7 +35,10 @@ class DocumentService:
     ):
         self.db_client = db_client
         self.cloud_storage_service = cloud_storage_service
-        self.embeddings_model = OllamaEmbeddings(model=settings.EMBEDDINGS_MODEL)
+        self.embeddings_model = OllamaEmbeddings(
+            model=settings.EMBEDDINGS_MODEL,
+            base_url=settings.OLLAMA_BASE_URL,
+        )
 
     def create_signed_url(
         self, file_upload_request: CreateDocRequest, file_identifier: UUID

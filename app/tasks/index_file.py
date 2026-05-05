@@ -41,7 +41,10 @@ async def _process_document(doc_identifier: UUID):
             return None
     blob_path = get_blob_name(doc_identifier, document.file_name)
     document_id = document.id
-    embeddings_model = OllamaEmbeddings(model=settings.EMBEDDINGS_MODEL)
+    embeddings_model = OllamaEmbeddings(
+        model=settings.EMBEDDINGS_MODEL,
+        base_url=settings.OLLAMA_BASE_URL,
+    )
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=TEXT_SPLITTER_CHUNK_SIZE, chunk_overlap=TEXT_SPLITTER_CHUNK_OVERLAP
     )

@@ -23,7 +23,6 @@ services:
       - "8000:80"
     volumes:
       - .:/code
-
     environment:
       SQLALCHEMY_DATABASE_URL: postgresql+asyncpg://doc_search_user:docsearchPassword@db:5432/doc_search
     depends_on:

@@ -1,8 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from sqlalchemy import literal_column, select, update
-from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.documents import Document, DocumentEmbedding
@@ -79,17 +78,22 @@ class DocumentDbClient:
     ) -> None:
         """
         Bulk create document embeddings.
-        On conflict, the new record overwrites the old.
         """
-        await db_session.execute(
-            pg_insert(DocumentEmbedding).on_conflict_do_update(
-                constraint="uq_document_embeddings_document_id_page_number",
-                set_={
-                    "content": literal_column("excluded.content"),
-                    "embedding": literal_column("excluded.embedding"),
-                    "content_metadata": literal_column("excluded.content_metadata"),
-                },
-            ),
-            [single_embedding.model_dump() for single_embedding in embedding_requests],
+        db_session.add_all(
+            [DocumentEmbedding(**req.model_dump()) for req in embedding_requests]
         )
         await db_session.commit()
+
+    async def document_embedding_lookup(
+        self, db_session: AsyncSession, search_embedding: list, limit: int | None = 5
+    ) -> List[DocumentEmbedding]:
+        """
+        Uses cosine_distance to look_up relevant documents
+        """
+        query = (
+            select(DocumentEmbedding)
+            .order_by(DocumentEmbedding.embedding.cosine_distance(search_embedding))
+            .limit(limit)
+        )
+        result_object = await db_session.execute(query)
+        return result_object.scalars()

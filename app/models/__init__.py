@@ -1,3 +1,3 @@
-from app.models.documents import Document, DocumentEmbeddings
+from app.models.documents import Document, DocumentEmbedding
 
-__all__ = ["Document", "DocumentEmbeddings"]
+__all__ = ["Document", "DocumentEmbedding"]

@@ -39,7 +39,7 @@ class Document(Base):
     updated_at: Mapped[datetime] = mapped_column(
         server_default=func.now(), onupdate=func.now()
     )
-    embeddings: Mapped[List["DocumentEmbeddings"]] = relationship(
+    embeddings: Mapped[List["DocumentEmbedding"]] = relationship(
         back_populates="document"
     )
 
@@ -47,7 +47,7 @@ class Document(Base):
         return f"Doc(id={self.id}) - {self.file_name}"
 
 
-class DocumentEmbeddings(Base):
+class DocumentEmbedding(Base):
     __tablename__ = "document_embeddings"
 
     id: Mapped[int] = mapped_column(primary_key=True)

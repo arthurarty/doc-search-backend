@@ -47,8 +47,11 @@ class EmbeddingService:
             document = await self.db_client.get_by_unique_identifier(
                 session, unique_identifier=document_uuid
             )
-            if not document:
-                return None
+        if not document:
+            return None
+        if document.status == DocumentStatusEnum.INDEXED:
+            logger.info("Document: %s already indexed", document_uuid)
+            return None
         blob_path = get_blob_name(document_uuid, document.file_name)
         document_id = document.id
         for i, pdf_page_content in enumerate(

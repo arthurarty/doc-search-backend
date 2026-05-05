@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 from typing import List
-from uuid import UUID, uuid4
+from uuid import UUID, uuid7
 
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import Enum, Float, ForeignKey, func
@@ -27,7 +27,7 @@ class Document(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     unique_identifier: Mapped[UUID] = mapped_column(
-        default=uuid4, index=True, unique=True
+        default=uuid7, index=True, unique=True
     )
     file_name: Mapped[str] = mapped_column(index=True)
     file_size: Mapped[float] = mapped_column(Float)

@@ -34,9 +34,8 @@ async def process_document(blob_path: str, document_id: int):
                 CreateDocumentEmbeddingRequest(
                     embedding=embedding,
                     document_id=document_id,
-                    content_metadata={
-                        "page_id": i,
-                    },
+                    page_number=i,
+                    content_metadata={},
                     content=text,
                 )
             )

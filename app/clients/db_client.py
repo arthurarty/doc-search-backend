@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import literal_column, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -89,7 +89,14 @@ class DocumentDbClient:
         embedding_requests: List[CreateDocumentEmbeddingRequest],
     ) -> None:
         await db_session.execute(
-            pg_insert(DocumentEmbedding).on_conflict_do_update(),
+            pg_insert(DocumentEmbedding).on_conflict_do_update(
+                constraint="uq_document_embeddings_document_id_page_number",
+                set_={
+                    "content": literal_column("excluded.content"),
+                    "embedding": literal_column("excluded.embedding"),
+                    "content_metadata": literal_column("excluded.content_metadata"),
+                },
+            ),
             [single_embedding.model_dump() for single_embedding in embedding_requests],
         )
         await db_session.commit()

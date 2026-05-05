@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     SQLALCHEMY_DATABASE_URL: str
     VOYAGE_AI_KEY: str
     EMBEDDINGS_MODEL: str
+    REDIS_HOST: str
+    REDIS_PORT: str
+    REDIS_DB: str
 
     model_config = SettingsConfigDict(env_file=".env")
 

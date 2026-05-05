@@ -95,11 +95,6 @@ def upgrade() -> None:
             name=op.f("fk_document_embeddings_document_id_documents"),
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_document_embeddings")),
-        sa.UniqueConstraint(
-            "document_id",
-            "page_number",
-            name="uq_document_embeddings_document_id_page_number",
-        ),
     )
     # ### end Alembic commands ###
 

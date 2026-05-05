@@ -85,15 +85,21 @@ class DocumentDbClient:
         await db_session.commit()
 
     async def document_embedding_lookup(
-        self, db_session: AsyncSession, search_embedding: list, limit: int | None = 5
+        self,
+        db_session: AsyncSession,
+        search_embedding: list,
+        limit: int | None = 5,
+        max_distance: float = 0.4,
     ) -> List[DocumentEmbedding]:
         """
         Uses cosine_distance to look_up relevant documents
         """
+        distance = DocumentEmbedding.embedding.cosine_distance(search_embedding)
         query = (
             select(DocumentEmbedding)
-            .order_by(DocumentEmbedding.embedding.cosine_distance(search_embedding))
+            .where(distance <= max_distance)
+            .order_by(distance)
             .limit(limit)
         )
         result_object = await db_session.execute(query)
-        return result_object.scalars()
+        return result_object.scalars().all()

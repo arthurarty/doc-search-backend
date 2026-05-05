@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.clients.db_client import DocumentDbClient
 from app.config import settings
+from app.models.documents import DocumentStatusEnum
 from app.schemas.cloud_storage_schemas import SignedUrlRequest, SignedUrlResponse
 from app.schemas.document_schemas import (
     CreateDocRequest,
@@ -18,7 +19,8 @@ from app.schemas.document_schemas import (
     UpdateOrgFileRecordRequest,
 )
 from app.services.cloud_storage_service import CloudStorageService
-from app.utils.file_utils import get_file_extension
+from app.tasks.index_file import process_document
+from app.utils.file_utils import get_blob_name
 
 
 class DocumentService:
@@ -33,13 +35,15 @@ class DocumentService:
     ):
         self.db_client = db_client
         self.cloud_storage_service = cloud_storage_service
-        self.embeddings_model = OllamaEmbeddings(model=settings.EMBEDDINGS_MODEL)
+        self.embeddings_model = OllamaEmbeddings(
+            model=settings.EMBEDDINGS_MODEL,
+            base_url=settings.OLLAMA_BASE_URL,
+        )
 
     def create_signed_url(
         self, file_upload_request: CreateDocRequest, file_identifier: UUID
     ) -> SignedUrlResponse:
-        file_extension = get_file_extension(file_upload_request.file_name)
-        blob_name = f"{file_identifier.hex}.{file_extension}"
+        blob_name = get_blob_name(file_identifier, file_upload_request.file_name)
         signed_url_request = SignedUrlRequest(
             blob_name=blob_name,
             content_type=file_upload_request.content_type,
@@ -108,13 +112,16 @@ class DocumentService:
         This triggers a background task to index the document once
         Document has been uploaded to storage.
         """
-        return await self.db_client.update_document_status(
+        row_count = await self.db_client.update_document_status(
             db_session,
             UpdateOrgFileRecordRequest(
                 unique_identifier=unique_identifier,
                 status=update_request.status,
             ),
         )
+        if row_count and update_request.status == DocumentStatusEnum.UPLOADED:
+            process_document.delay(unique_identifier)
+        return row_count
 
     async def semantic_search(
         self, db_session: AsyncSession, input_query: str

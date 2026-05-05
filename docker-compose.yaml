@@ -23,12 +23,42 @@ services:
       - "8000:80"
     volumes:
       - .:/code
-
     environment:
       SQLALCHEMY_DATABASE_URL: postgresql+asyncpg://doc_search_user:docsearchPassword@db:5432/doc_search
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+  worker:
+    build: .
+    command: celery -A app.celery_app:celery_app worker --loglevel=info
+    volumes:
+      - .:/code
+    environment:
+      SQLALCHEMY_DATABASE_URL: postgresql+asyncpg://doc_search_user:docsearchPassword@db:5432/doc_search
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+  redis:
+    image: redis:8-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 
 volumes:

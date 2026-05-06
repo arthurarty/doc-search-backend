@@ -4,6 +4,7 @@ A restful API that powers a RAG application.
 ## Architecture
 This project follows a `Service Orchestrator` design. Services house the business logic and use clients and other services to fulfil the requests.  
 Any endpoint exposed by the API points to service. Any clients or services required by the service are passed to it using `Dependency injection`.  
+The application is built to be stateless so that it can scale horizontally.   
 
 ## Document indexing
 1. Document indexing starts with file upload. To upload a file the client requests for a signed url using the endpoint `/docs/signed-url/`.
